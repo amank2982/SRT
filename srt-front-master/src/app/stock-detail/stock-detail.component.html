@@ -1,0 +1,310 @@
+<!-- Stockdetail.html -->
+
+<div class="container" *ngIf="!isLoading && stockData">
+  <div [ngClass]="stockPerformanceClass" class="stock-detail-container">
+    <!-- Topsection -->
+    <div class="header">
+      <div class="logo-container">
+        <img class="logo" src="images/dashboardlogo.png" alt="Logo" />
+      </div>
+      <div class="search-logout-container">
+        <div class="search-section">
+          <div
+            class="search-container"
+            style="position: relative"
+            #searchBoxWrapper
+          >
+            <input
+              class="search-input"
+              type="text"
+              [(ngModel)]="searchQuery"
+              placeholder="Search stocks..."
+              (keyup.enter)="searchStock()"
+              [formControl]="searchControl"
+              (input)="onSearchInput()"
+            />
+            <button class="search-button" (click)="searchStock()">
+              <i class="fas fa-search search-icon"></i>
+            </button>
+
+            <button
+              class="voice-search-button"
+              (click)="toggleVoiceSearch()"
+              [disabled]="!isVoiceSupported"
+              [class.listening]="isListening"
+              [class.disabled]="!isVoiceSupported"
+              title="{{
+                isVoiceSupported ? 'Voice Search' : 'Voice search not supported'
+              }}"
+            >
+              <i *ngIf="!isListening" class="fas fa-microphone"></i>
+              <i
+                *ngIf="isListening"
+                class="fas fa-microphone-slash pulse"
+              ></i></button
+            ><!-- Voice search status and guidance -->
+            <div
+              *ngIf="voiceSearchText"
+              class="voice-status"
+              [class.error]="
+                voiceSearchText.includes('Error') ||
+                voiceSearchText.includes('Could not')
+              "
+            >
+              <div class="voice-status-content">
+                <span *ngIf="isListening" class="pulse-animation"></span>
+                {{ voiceSearchText }}
+              </div>
+              <div *ngIf="isListening" class="voice-hint">
+                <small
+                  >Tip: Say letters like <strong>"A A P L"</strong> or company
+                  names like <strong>"Apple"</strong></small
+                >
+              </div>
+            </div>
+
+            <!-- Display Stock suggestions -->
+            <ul class="suggestion-list" *ngIf="suggestions.length > 0">
+              <li
+                class="suggestion-item"
+                *ngFor="let suggestion of suggestions"
+                (click)="selectSuggestion(suggestion)"
+              >
+                <Strong>{{ suggestion.symbol }}</Strong> -
+                {{ suggestion.description }}
+              </li>
+            </ul>
+            <!-- No suggestions found -->
+            <div
+              class="no-results"
+              *ngif="
+                searchControl.value?.length >= 2 && suggestions.length === 0
+              "
+            >
+              <p>No results found</p>
+            </div>
+          </div>
+        </div>
+        <button class="logout-button" (click)="logout()">
+          Logout <i class="fas fa-sign-out-alt"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="marquee-container">
+      <marquee direction="left">
+        <span *ngFor="let stock of trendingStocks">
+          {{ stock.symbol }} ({{ stock.shortName }}) -
+          {{ stock.regularMarketPrice | number : "1.2-2" }}
+          <span
+            [class.positive]="stock.regularMarketChange >= 0"
+            [class.negative]="stock.regularMarketChange < 0"
+          >
+            ({{ stock.regularMarketChange | number : "1.2-2" }})
+          </span>
+          <span
+            [class.positive]="stock.regularMarketChangePercent >= 0"
+            [class.negative]="stock.regularMarketChangePercent < 0"
+          >
+            {{ stock.regularMarketChangePercent | number : "1.2-2" }}%
+          </span>
+          &nbsp;&nbsp;&nbsp;
+        </span>
+      </marquee>
+    </div>
+
+    <div class="nav-items">
+      <button (click)="gotoAbout()" class="nav-item">About Us</button>
+      <button (click)="openComparePopup()" class="nav-item">Compare</button>
+      <a routerLink="/dashboard" class="nav-item">Dashboard</a>
+      <button (click)="gotoGlossary()" class="nav-item">Glossary</button>
+      <button (click)="gotoPrediction()" class="nav-item">Prediction</button>
+      <button (click)="gotoVideos()" class="nav-item">Videos</button>
+    </div>
+
+    <div class="stockNsummary">
+      <div class="show">
+        <div class="nameNsymbol">
+          <div class="stockname">
+            <p class="symbol">{{ stockData.symbol }}</p>
+            <p class="name" style="width: auto">{{ stockData.name }}</p>
+          </div>
+        </div>
+        <div class="price">{{ stockData.currentPrice }}</div>
+        <div
+          class="change"
+          [ngClass]="{
+            positive: stockData.change > 0,
+            negative: stockData.change < 0
+          }"
+        >
+          {{ stockData.change }} ({{ stockData.changePercent }}%)
+        </div>
+
+        <div class="timestamp">
+          At close: {{ stockData.timestamp | date : "shortTime" }} EDT
+        </div>
+      </div>
+
+      <div class="stock-summary" *ngIf="stockSummary">
+        <h3>{{ stockSummary.Symbol }} Summary</h3>
+        <div class="emoji-container">
+          <span *ngIf="stockData.change > 0" class="emoji-bull"
+            ><i class="fa fa-line-chart"> </i> Bullish</span
+          >
+          <span *ngIf="stockData.change < 0" class="emoji-bear"
+            ><i class="fa fa-line-chart"> </i> Bearish</span
+          >
+        </div>
+        <p>{{ stockSummary.Summary }}</p>
+        <div class="price-display">
+          Price: ${{ stockSummary.Details.CurrentPrice | number : "1.2-2" }}
+          <span
+            [class.positive]="stockSummary.Details.ChangePercent > 0"
+            [class.negative]="stockSummary.Details.ChangePercent < 0"
+          >
+            {{ stockSummary.Details.ChangePercent | number : "1.2-2" }}%
+          </span>
+        </div>
+        <div class="timestamp">
+          Updated: {{ stockSummary.Timestamp | date : "medium" }}
+        </div>
+      </div>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-value">{{ stockData.currentPrice }}</div>
+        <div class="card-label">Current Price</div>
+      </div>
+      <div class="card">
+        <div class="card-value">{{ stockData.change }}</div>
+        <div class="card-label">Day Change</div>
+      </div>
+      <div class="card">
+        <div class="card-value">{{ stockData.previousClose }}</div>
+        <div class="card-label">Previous Close</div>
+      </div>
+      <div class="card">
+        <div class="card-value">{{ stockData.changePercent }}%</div>
+        <div class="card-label">Day Change %</div>
+      </div>
+    </div>
+    <!-- Main stock chart -->
+    <div class="chart">
+      <canvas baseChart [data]="stockChartData" [type]="'line'"></canvas>
+    </div>
+
+    <div *ngIf="isLoading" class="loading">Loading stock details...</div>
+    <div *ngIf="!isLoading && errorMessage" class="error">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Popup for Stock Comparison -->
+    <div *ngIf="isComparePopupOpen" class="popup-overlay">
+      <div class="popup-content">
+        <span class="close-button" (click)="closeComparePopup()">×</span>
+        <h3>Compare Stocks</h3>
+        <div class="compare-form">
+          <label for="stock1">Stock 1:</label>
+          <input
+            type="text"
+            id="stock1"
+            [(ngModel)]="stock1"
+            placeholder="Enter first stock symbol"
+          />
+
+          <label for="stock2">Stock 2:</label>
+          <input
+            type="text"
+            id="stock2"
+            [(ngModel)]="stock2"
+            placeholder="Enter second stock symbol"
+          />
+
+          <button (click)="compareStocks()">Compare</button>
+        </div>
+
+        <div *ngIf="comparisonResult" class="comparison-result">
+          <h4>Comparison Result:</h4>
+          <table>
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th>{{ stock1 }}</th>
+                <th>{{ stock2 }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Current Price</td>
+                <td>{{ comparisonResult.stock1.currentPrice }}</td>
+                <td>{{ comparisonResult.stock2.currentPrice }}</td>
+              </tr>
+              <tr>
+                <td>Day Change</td>
+                <td>{{ comparisonResult.stock1.change }}</td>
+                <td>{{ comparisonResult.stock2.change }}</td>
+              </tr>
+              <tr>
+                <td>Change %</td>
+                <td>{{ comparisonResult.stock1.changePercent }}</td>
+                <td>{{ comparisonResult.stock2.changePercent }}</td>
+              </tr>
+              <tr>
+                <td>Previous Close</td>
+                <td>{{ comparisonResult.stock1.previousClose }}</td>
+                <td>{{ comparisonResult.stock2.previousClose }}</td>
+              </tr>
+              <tr>
+                <td>Open</td>
+                <td>{{ comparisonResult.stock1.open }}</td>
+                <td>{{ comparisonResult.stock2.open }}</td>
+              </tr>
+              <tr>
+                <td>High</td>
+                <td>{{ comparisonResult.stock1.high }}</td>
+                <td>{{ comparisonResult.stock2.high }}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- comparison chart -->
+          <div class="chart-container">
+            <canvas
+              baseChart
+              [data]="comparisonChartData"
+              [type]="'line'"
+            ></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<app-chatbot></app-chatbot>
+<footer class="footer">
+  <div class="footer-content">
+    <div class="footer-left">
+      <img
+        src="images/stock-detail.png"
+        alt="SearchInvest Logo"
+        class="footer-logo"
+      />
+      <p>Empowering your stock decisions with data-driven insights.</p>
+    </div>
+    <div class="footer-right">
+      <div class="footer-links">
+        <a href="#">Home</a>
+        <a href="#">About</a>
+        <a href="#">Support</a>
+        <a href="#">Terms</a>
+        <a href="#">Privacy</a>
+      </div>
+      <p class="footer-copy">
+        &copy; 2025 <strong>SEARCHINVEST</strong>. All rights reserved.
+      </p>
+    </div>
+  </div>
+</footer>
+</div>

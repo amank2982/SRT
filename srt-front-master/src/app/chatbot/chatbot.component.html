@@ -1,0 +1,47 @@
+<!-- Floating Chatbot Button -->
+<div class="chatbot-button" (click)="toggleChat()" aria-label="Open Chatbot">
+  <img src="images/bott.png" alt="Chat Icon" />
+</div>
+
+<!-- Chat Window -->
+<div class="chatbot-window" *ngIf="isOpen" aria-live="polite">
+  <!-- Chat Header -->
+  <div class="chat-header">
+    <h2>Chatbot</h2>
+    <button class="close-btn" (click)="toggleChat()" aria-label="Close Chatbot">×</button>
+  </div>
+
+  <!-- Chat Messages -->
+  <div class="chat-messages" role="log" aria-live="polite">
+    <div *ngFor="let msg of messages" [ngClass]="msg.from" class="message">
+      <span>{{ msg.text }}</span>
+    </div>
+    <div *ngIf="isTyping" class="bot typing-indicator" aria-label="Bot is typing">
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+    </div>
+  </div>
+
+  <!-- Chat Input -->
+  <div class="chat-input">
+    <label for="chat-input-field" class="sr-only">Type your message</label>
+    <input
+      id="chat-input-field"
+      [(ngModel)]="userInput"
+      (keyup.enter)="sendMessage()"
+      placeholder="Type a message..."
+      type="text"
+      aria-label="Type your message"
+    />
+    <button (click)="sendMessage()" aria-label="Send Message">➤</button>
+    <button
+      class="mic-btn"
+      (click)="startListening()"
+      [class.listening]="isListening"
+      title="Start voice input"
+      type="button"
+      aria-label="Start voice input"
+    >
+      🎤
+    </button>
+  </div>
+</div>

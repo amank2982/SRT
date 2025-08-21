@@ -1,0 +1,80 @@
+<div class="container">
+      
+      <div class="login-box">
+      <div class="mphs-container">
+            <img src="images/mphsss.png" alt="">
+      </div>
+      <img src="images/stock-detail.png" alt="Logo" class="logo" />
+
+       
+          <form #loginForm="ngForm" (ngSubmit)="login(loginForm)">
+      <!-- Email Field -->
+      <label for="email">Email</label>
+      <input
+      
+              type="email"
+      
+              id="email"
+      
+              name="email"
+      
+              [(ngModel)]="email"
+      
+              required
+      
+              email
+      
+              #emailRef="ngModel"
+      
+              placeholder="Enter your email"
+      
+            />
+       
+            <!-- Email Errors -->
+      <div *ngIf="emailRef.invalid && emailRef.touched" class="error">
+      <p *ngIf="emailRef.errors?.['required']">Email is required.</p>
+      <p *ngIf="emailRef.errors?.['email']">Please enter a valid email address.</p>
+      <p *ngIf="!isEmailValid(email) && emailRef.touched">Only Gmail addresses are allowed.</p>
+      </div>
+       
+            <!-- Password Field -->
+      <label for="password">Password</label>
+      <input
+      
+              type="password"
+      
+              id="password"
+      
+              name="password"
+      
+              [(ngModel)]="password"
+      
+              required
+      
+              minlength="6"
+      
+              #passwordRef="ngModel"
+      
+              placeholder="Enter your password"
+      
+            />
+       
+            <!-- Password Errors -->
+      <div *ngIf="passwordRef.invalid && passwordRef.touched" class="error">
+      <p *ngIf="passwordRef.errors?.['required']">Password is required.</p>
+      <p *ngIf="passwordRef.errors?.['minlength']">Password must be at least 6 characters long.</p>
+      </div>
+       
+            <!-- Submit Button -->
+      <button type="submit" [disabled]="loginForm.invalid">Login</button>
+      </form>
+       
+          <p style="margin-top: 20px; text-align: center;">
+      
+            Don't have an account?
+      <a (click)="goToRegister()" style="cursor: pointer; color: #1c3484; font-weight: 500;" id="register">Register</a>
+      </p>
+      </div>
+      </div>
+             
+         

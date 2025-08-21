@@ -1,0 +1,297 @@
+<div class="dashboard-container">
+  <div class="header">
+    <div class="logo-container">
+      <img src="images/dashboardlogo.png" alt="Logo" class="logo" />
+    </div>
+    <div class="search-logout-container">
+      <div class="search-section">
+        <div
+          class="search-container"
+          style="position: relative"
+          #searchBoxWrapper
+        >
+          <input
+            type="text"
+            [(ngModel)]="searchQuery"
+            (input)="searchErrorMessage = null"
+            placeholder="Search stocks..."
+            (keyup.enter)="searchStock()"
+            [formControl]="searchControl"
+            (input)="onSearchInput()"
+            class="search-input"
+          />
+
+          <button class="search-button" (click)="searchStock()">
+            <i class="fas fa-search search-icon"></i>
+          </button>
+
+          <button
+            class="voice-search-button"
+            (click)="toggleVoiceSearch()"
+            [disabled]="!isVoiceSupported"
+            [class.listening]="isListening"
+            [class.disabled]="!isVoiceSupported"
+            title="{{
+              isVoiceSupported ? 'Voice Search' : 'Voice search not supported'
+            }}"
+          >
+            <i *ngIf="!isListening" class="fas fa-microphone"></i>
+            <i
+              *ngIf="isListening"
+              class="fas fa-microphone-slash pulse"
+            ></i></button
+          ><!-- Voice search status and guidance -->
+          <div
+            *ngIf="voiceSearchText"
+            class="voice-status"
+            [class.error]="
+              voiceSearchText.includes('Error') ||
+              voiceSearchText.includes('Could not')
+            "
+          >
+            <div class="voice-status-content">
+              <span *ngIf="isListening" class="pulse-animation"></span>
+              {{ voiceSearchText }}
+            </div>
+            <div *ngIf="isListening" class="voice-hint">
+              <small
+                >Tip: Say letters like <strong>"A A P L"</strong> or company
+                names like <strong>"Apple"</strong></small
+              >
+            </div>
+          </div>
+
+          <div *ngIf="searchErrorMessage" class="error-message">
+            {{ searchErrorMessage }}
+          </div>
+          <ul class="suggestion-list" *ngIf="suggestions.length > 0">
+            <li
+              class="suggestion-item"
+              *ngFor="let suggestion of suggestions"
+              (click)="selectSuggestion(suggestion)"
+            >
+              <strong>{{ suggestion.symbol }}</strong> -
+              {{ suggestion.description }}
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="user-initial-avatar">
+        {{ userInitial }}
+      </div>
+      <p id="hi">Hi, Welcome</p>
+      <button class="logout-button" (click)="logout()">
+        Logout <i class="fas fa-sign-out-alt"></i>
+      </button>
+    </div>
+  </div>
+  <marquee class="marquee-text" behavior="scroll" direction="left">
+    Welcome to SearchNvest! Stay updated with the latest stock trends and news.
+  </marquee>
+
+  <div class="nav-items">
+    <button (click)="gotoAbout()" class="nav-item">About Us</button>
+    <button (click)="openComparePopup()" class="nav-item">Compare</button>
+    <button (click)="gotoGlossary()" class="nav-item">Glossary</button>
+    <button (click)="gotoPrediction()" class="nav-item">Prediction</button>
+    <button (click)="gotoVideos()" class="nav-item">Videos</button>
+    <button (click)="gotoWatchlist()" class="nav-item">Watchlist</button>
+  </div>
+
+  <!-- Trending Tickers Section -->
+  <h2>TRENDING TICKERS</h2>
+  <div *ngIf="isLoadingStocks" class="loading-indicator">
+    <div class="spinner"></div>
+    <p>Loading stocks...</p>
+  </div>
+
+  <div *ngIf="errorMessageStocks" class="error-message">
+    {{ errorMessageStocks }}
+    <button (click)="refreshData()">Retry</button>
+  </div>
+
+  <!-- Stock Table -->
+  <div
+    class="table-container"
+    *ngIf="!isLoadingStocks && trendingStocks.length > 0"
+  >
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Name</th>
+          <th>Last Price</th>
+          <th>Change</th>
+          <th>Change%</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let stock of trendingStocks"
+          (click)="goToStockDetail(stock.symbol)"
+        >
+          <td id="stock_symbol">{{ stock.symbol }}</td>
+          <td>{{ stock.shortName }}</td>
+          <td>{{ stock.regularMarketPrice | number : "1.2-2" }}</td>
+          <td
+            [class.positive]="stock.regularMarketChange >= 0"
+            [class.negative]="stock.regularMarketChange < 0"
+          >
+            {{ stock.regularMarketChange | number : "1.2-2" }}
+          </td>
+          <td
+            [class.positive]="stock.regularMarketChangePercent >= 0"
+            [class.negative]="stock.regularMarketChangePercent < 0"
+          >
+            {{ stock.regularMarketChangePercent | number : "1.2-2" }}%
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Empty State for Stocks -->
+  <div
+    *ngIf="
+      !isLoadingStocks && trendingStocks.length === 0 && !errorMessageStocks
+    "
+    class="empty-state"
+  >
+    <p>No trending stocks available at the moment.</p>
+    <button (click)="refreshData()">Refresh Data</button>
+  </div>
+
+  <!-- Latest News Section -->
+  <h2>LATEST NEWS</h2>
+  <div *ngIf="isLoadingNews" class="loading-indicator">
+    <div class="spinner"></div>
+    <p>Loading news...</p>
+  </div>
+
+  <div *ngIf="errorMessageNews" class="error-message">
+    {{ errorMessageNews }}
+    <button (click)="getLatestNews()">Retry</button>
+  </div>
+
+  <div *ngIf="!isLoadingNews && latestNews.length > 0" class="news-container">
+    <div class="news-card" *ngFor="let news of latestNews">
+      <a [href]="news.url" target="_blank" class="news-title">{{
+        news.title || "No title available"
+      }}</a>
+      <p class="news-source">
+        {{ news.source }} - {{ news.publishedAt | date : "short" }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Empty State for News -->
+  <div
+    *ngIf="!isLoadingNews && latestNews.length === 0 && !errorMessageNews"
+    class="empty-state"
+  >
+    <p>No latest news available at the moment.</p>
+  </div>
+  <app-chatbot></app-chatbot>
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-left">
+        <img
+          src="images/stock-detail.png"
+          alt="SearchInvest Logo"
+          class="footer-logo"
+        />
+        <p>Empowering your stock decisions with data-driven insights.</p>
+      </div>
+      <div class="footer-right">
+        <div class="footer-links">
+          <a href="#">Home</a>
+          <a href="#">About</a>
+          <a href="#">Support</a>
+          <a href="#">Terms</a>
+          <a href="#">Privacy</a>
+        </div>
+        <p class="footer-copy">
+          &copy; 2025 <strong>SEARCHINVEST</strong>. All rights reserved.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Compare Stocks Popup -->
+  <div *ngIf="isComparePopupOpen" class="popup-overlay">
+    <div class="popup-content">
+      <span class="close-button" (click)="closeComparePopup()">×</span>
+      <h3>Compare Stocks</h3>
+      <div class="compare-form">
+        <label for="stock1">Stock 1:</label>
+        <input
+          type="text"
+          id="stock1"
+          [(ngModel)]="stock1"
+          placeholder="Enter first stock symbol"
+        />
+        <label for="stock2">Stock 2:</label>
+        <input
+          type="text"
+          id="stock2"
+          [(ngModel)]="stock2"
+          placeholder="Enter second stock symbol"
+        />
+        <button (click)="compareStocks()">Compare</button>
+      </div>
+
+      <div *ngIf="comparisonResult" class="comparison-result">
+        <h4>Comparison Result:</h4>
+        <table>
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>{{ stock1 }}</th>
+              <th>{{ stock2 }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Current Price</td>
+              <td>{{ comparisonResult.stock1.currentPrice }}</td>
+              <td>{{ comparisonResult.stock2.currentPrice }}</td>
+            </tr>
+            <tr>
+              <td>Day Change</td>
+              <td>{{ comparisonResult.stock1.change }}</td>
+              <td>{{ comparisonResult.stock2.change }}</td>
+            </tr>
+            <tr>
+              <td>Change %</td>
+              <td>{{ comparisonResult.stock1.changePercent }}</td>
+              <td>{{ comparisonResult.stock2.changePercent }}</td>
+            </tr>
+            <tr>
+              <td>Previous Close</td>
+              <td>{{ comparisonResult.stock1.previousClose }}</td>
+              <td>{{ comparisonResult.stock2.previousClose }}</td>
+            </tr>
+            <tr>
+              <td>Open</td>
+              <td>{{ comparisonResult.stock1.open }}</td>
+              <td>{{ comparisonResult.stock2.open }}</td>
+            </tr>
+            <tr>
+              <td>High</td>
+              <td>{{ comparisonResult.stock1.high }}</td>
+              <td>{{ comparisonResult.stock2.high }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="chart-container">
+          <canvas
+            baseChart
+            [data]="comparisonChartData"
+            [type]="'line'"
+          ></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,98 @@
+.container {
+  background-image: url('/images/4.jpg');
+  background-size: cover;
+  background-position: center;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+ 
+.login-box {
+  background: rgba(255, 255, 255); /* semi-transparent for glass effect */
+  backdrop-filter: blur(50px); /* glassmorphism blur */
+  -webkit-backdrop-filter: blur(12px);
+  padding: 25px 20px;
+  border-radius: 0px;
+  margin: 0 auto;
+  margin-top: 31px;
+  width: 320px;
+  text-align: left;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+}
+.login-box:hover {
+  transform: translateY(-5px);
+}
+.login-box p {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1c3484;
+  margin-bottom: 20px;
+}
+ 
+input {
+  width: 100%;
+  padding: 11px 14px;
+  margin: 14px 0;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  box-sizing: border-box;
+  transition: 0.3s ease;
+  font-size: 12px;
+}
+ 
+input:focus {
+  outline: none;
+  border-color: #1c3484;
+  box-shadow: 0 0 6px rgba(28, 52, 132, 0.25);
+}
+
+button {
+  width: 100%;
+  padding: 8px;
+  background-color: #1E3a8a;
+  color: white;
+  border: 2px solid #1c3484;
+  margin-top: 12px;
+  font-weight: 600;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+button:hover {
+  transform: scale(1.02);
+}
+
+.logo {
+  width: 180px;
+  height: auto;
+  margin: 0 auto 25px auto;
+  display: block;
+}
+
+ 
+.error-message {
+  color: #ff4d4d;
+  font-size: 13px;
+  margin-top: -8px;
+  margin-bottom: 12px;
+}
+ 
+.error p {
+  color: red;
+  margin: 0;
+  font-size: 13px;
+  text-align: center;
+}
+#login:hover{
+  text-decoration: underline;
+}
+
+ 
+ 

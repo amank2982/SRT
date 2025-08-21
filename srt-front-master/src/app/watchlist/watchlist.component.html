@@ -1,0 +1,101 @@
+<div class="container">
+    <!-- Header Section -->
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <img src="images/stock-detail.png" alt="Logo" class="logo" />
+            </div>
+            <a href="/dashboard" class="btn-back-dashboard">← Back</a>
+        </div>
+    </header>
+ 
+    <!-- Page Header Section -->
+    <div class="page-header">
+      <h1>Your Stock Watchlist</h1>
+      <p>Track your favorite stocks and get real-time updates on price movements and performance metrics.</p>
+    </div>
+ 
+    <!-- Watchlist Section -->
+    <section class="watchlist-section">
+      <div class="watchlist-controls">
+        <!-- Search Box -->
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" [(ngModel)]="newStockSymbol" placeholder="Enter stock symbol" />
+        </div>
+        <!-- Add Stock Button -->
+        <button class="add-stock-btn" (click)="addToWatchlist()">Add Stock</button>
+      </div>
+ 
+      <!-- Empty State -->
+      <div *ngIf="watchlist.length === 0" class="empty-state">
+        <p>No stocks in your watchlist yet. Add some!</p>
+      </div>
+ 
+      <!-- Watchlist Table -->
+      <table *ngIf="watchlist.length > 0" class="watchlist-table">
+        <thead>
+          <!-- <tr> -->
+            <th>Symbol</th>
+            <th>Name</th>
+            <th>Last Price</th>
+            <th>Change</th>
+            <th>Change%</th>
+            <th>Actions</th>
+          <!-- </tr> -->
+        </thead>
+        <tbody>
+          <tr *ngFor="let stock of watchlist">
+            <td class="stock-symbol">{{ stock.symbol }}</td>
+            <td class="stock-name">
+              <span class="stock-company">{{ stock.shortName}}</span>
+            </td>
+            <td>{{ stock.regularMarketPrice | number:'1.2-2' }}</td>
+            <td [class.price-up]="stock.regularMarketChange >= 0" [class.price-down]="stock.regularMarketChange < 0">
+              {{ stock.regularMarketChange | number:'1.2-2' }}
+            </td>
+            <td [class.price-up]="stock.regularMarketChangePercent >= 0" [class.price-down]="stock.regularMarketChangePercent < 0">
+              {{ stock.regularMarketChangePercent | number:'1.2-2' }}%
+            </td>
+            <td class="action-btns">
+              <button class="action-btn delete" (click)="removeFromWatchlist(stock)">Remove</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+ 
+    <!-- Footer Section -->
+    <footer>
+      <div class="footer-content">
+        <div class="footer-column">
+          <h3>About</h3>
+          <ul>
+            <li><a href="#">Our Story</a></li>
+            <li><a href="#">Team</a></li>
+            <li><a href="#">Careers</a></li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h3>Support</h3>
+          <ul>
+            <li><a href="#">Help Center</a></li>
+            <li><a href="#">Contact Us</a></li>
+            <li><a href="#">FAQs</a></li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h3>Follow Us</h3>
+          <ul>
+            <li><a href="#">Facebook</a></li>
+            <li><a href="#">Twitter</a></li>
+            <li><a href="#">LinkedIn</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="copyright">
+        &copy; 2025 StockResearch. All rights reserved.
+      </div>
+    </footer>
+  </div>
+ 
